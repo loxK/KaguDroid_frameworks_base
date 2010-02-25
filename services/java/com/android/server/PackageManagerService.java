@@ -596,8 +596,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     SystemClock.uptimeMillis());
             mAppInstallObserver = new AppDirObserver(
                 mAppInstallDir.getPath(), OBSERVER_EVENTS, false);
-            scanDirLI(mAppInstallDir, 0, scanMode);
             mAppInstallObserver.startWatching();
+            scanDirLI(mAppInstallDir, 0, scanMode);
 
             mSdExtInstallObserver = new AppDirObserver(
                 mSdExtInstallDir.getPath(), OBSERVER_EVENTS, false);
@@ -606,8 +606,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
             mDrmAppInstallObserver = new AppDirObserver(
                 mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
-            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode | SCAN_FORWARD_LOCKED);
             mDrmAppInstallObserver.startWatching();
+            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode | SCAN_FORWARD_LOCKED);
 
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -1876,7 +1876,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         && (p.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) != 0
                         && (!mSafeMode || (p.applicationInfo.flags
                                 &ApplicationInfo.FLAG_SYSTEM) != 0)) {
-                    finalList.add(PackageParser.generateApplicationInfo(p, flags));
+                    finalList.add(p.applicationInfo);
                 }
             }
         }
@@ -1992,12 +1992,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             PackageParser.Package pkg = scanPackageLI(file, file, resFile,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
-            // Don't mess around with apps in system partition.
-            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0) {
-                // Delete the apk
-                Log.w(TAG, "Cleaning up failed install of " + file);
-                file.delete();
-            }
         }
     }
 
@@ -2192,13 +2186,6 @@ class PackageManagerService extends IPackageManager.Stub {
         File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
 
-        if (scanFile == null || destCodeFile == null ||
-                destResourceFile == null) {
-            // Bail out. The resource and code paths haven't been set.
-            Log.w(TAG, " Code and resource paths haven't been set correctly");
-            mLastScanError = PackageManager.INSTALL_FAILED_INVALID_APK;
-            return null;
-        }
         mScanningPath = scanFile;
         if (pkg == null) {
             mLastScanError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
@@ -5945,7 +5932,7 @@ class PackageManagerService extends IPackageManager.Stub {
             this.codePath = codePath;
             this.codePathString = codePath.toString();
             this.resourcePath = resourcePath;
-            this.resourcePathString = resourcePath == null ? null : resourcePath.toString();
+            this.resourcePathString = resourcePath.toString();
             this.versionCode = pVersionCode;
         }
 
