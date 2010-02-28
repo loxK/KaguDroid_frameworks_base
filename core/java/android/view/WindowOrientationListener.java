@@ -136,7 +136,7 @@ public abstract class WindowOrientationListener {
         private static final int LANDSCAPE_LOWER = 235;
         // Minimum angle which is considered portrait
         private static final int PORTRAIT_LOWER = 60;
-
+        
         // Internal value used for calculating linear variant
         private static final float PL_LF_UPPER =
             ((float)(PL_UPPER-PL_LOWER))/((float)(PIVOT_UPPER-PIVOT));
@@ -147,7 +147,6 @@ public abstract class WindowOrientationListener {
             ((float)(LP_UPPER - LP_LOWER))/((float)(PIVOT_UPPER-PIVOT));
         private static final float LP_LF_LOWER =
             ((float)(LP_UPPER - LP_LOWER))/((float)(PIVOT-PIVOT_LOWER)); 
-
 
         // new orientation h4x start here
         // -- optedoblivion
@@ -198,10 +197,33 @@ public abstract class WindowOrientationListener {
             ((float)(LP_UPPER_4 - LP_LOWER_4))/((float)(PIVOT-PIVOT_LOWER)); 
 
 	// End h4x vars        
+=======
+>>>>>>> ctso/eclair:core/java/android/view/WindowOrientationListener.java
 
+        // Internal value used for calculating linear variant
+        private static final float PL_LF_UPPER_3 =
+            ((float)(PL_UPPER_3-PL_LOWER))/((float)(PIVOT_UPPER-PIVOT));
+        private static final float PL_LF_LOWER_3 =
+            ((float)(PL_UPPER_3-PL_LOWER))/((float)(PIVOT-PIVOT_LOWER));
+        //  Internal value used for calculating linear variant
+        private static final float LP_LF_UPPER_3 =
+            ((float)(LP_UPPER_3 - LP_LOWER_3))/((float)(PIVOT_UPPER-PIVOT));
+        private static final float LP_LF_LOWER_3 =
+            ((float)(LP_UPPER_3 - LP_LOWER_3))/((float)(PIVOT-PIVOT_LOWER)); 
 
+        // Internal value used for calculating linear variant
+        private static final float PL_LF_UPPER_4 =
+            ((float)(PL_UPPER_4-PL_LOWER_2))/((float)(PIVOT_UPPER-PIVOT));
+        private static final float PL_LF_LOWER_4 =
+            ((float)(PL_UPPER_4-PL_LOWER_2))/((float)(PIVOT-PIVOT_LOWER));
+        //  Internal value used for calculating linear variant
+        private static final float LP_LF_UPPER_4 =
+            ((float)(LP_UPPER_4 - LP_LOWER_4))/((float)(PIVOT_UPPER-PIVOT));
+        private static final float LP_LF_LOWER_4 =
+            ((float)(LP_UPPER_4 - LP_LOWER_4))/((float)(PIVOT-PIVOT_LOWER)); 
 
-        
+	// End h4x vars        
+
         public void onSensorChanged(SensorEvent event) {
             float[] values = event.values;
             float X = values[_DATA_X];

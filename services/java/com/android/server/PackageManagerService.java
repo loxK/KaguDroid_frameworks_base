@@ -27,6 +27,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -57,6 +58,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -75,6 +77,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.*;
 import android.view.Display;
 import android.view.WindowManager;
@@ -219,7 +222,7 @@ class PackageManagerService extends IPackageManager.Stub {
     final HashMap<String, PackageParser.Package> mPackages =
             new HashMap<String, PackageParser.Package>();
 
-    final Settings mSettings;
+    final DynamicSettings mSettings;
     boolean mRestoredSettings;
     boolean mReportedUidError;
 
@@ -378,7 +381,7 @@ class PackageManagerService extends IPackageManager.Stub {
         mFactoryTest = factoryTest;
         mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
-        mSettings = new Settings();
+        mSettings = new DynamicSettings();
         mSettings.addSharedUserLP("android.uid.system",
                 Process.SYSTEM_UID, ApplicationInfo.FLAG_SYSTEM);
         mSettings.addSharedUserLP("android.uid.phone",
@@ -3772,17 +3775,17 @@ class PackageManagerService extends IPackageManager.Stub {
     
     /* Called when a downloaded package installation is completed (usually by the Market) */
     public void installPackage(final Uri packageURI, final IPackageInstallObserver observer, final int flags, final String installerPackageName) {
-       // Here we need to throw an Intent to prompt the user to choose the install location.
-       
-       Intent intent = new Intent();
-       intent.setData(packageURI);
-       intent.putExtra("installerPackageName", installerPackageName);
-       intent.putExtra("flags", flags);
-       intent.setComponent(new ComponentName("com.android.packageinstaller","com.android.packageinstaller.MarketInstallerActivity"));
-       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-       mContext.startActivity(intent);
-       
-       return;
+    	Boolean a2sd = false;
+
+    	a2sd = Settings.Secure.getInt(mContext.getContentResolver(),Settings.Secure.APPS2SD, 0) > 0;
+    	
+    	if (a2sd) { 		
+    		installPackageExt(packageURI, observer, flags, installerPackageName, true);
+    	} else {
+    		installPackageExt(packageURI, observer, flags, installerPackageName, false);
+    	}
+
+    	return;
     }
 
     public void installPackageExt(final Uri packageURI, final IPackageInstallObserver observer, final int flags, final String installerPackageName, boolean extInstall) {
@@ -6059,7 +6062,7 @@ class PackageManagerService extends IPackageManager.Stub {
     /**
      * Holds information about dynamic settings.
      */
-    private static final class Settings {
+    private static final class DynamicSettings {
         private final File mSettingsFilename;
         private final File mBackupSettingsFilename;
         private final HashMap<String, PackageSetting> mPackages =
@@ -6122,7 +6125,7 @@ class PackageManagerService extends IPackageManager.Stub {
         private final ArrayList<PendingPackage> mPendingPackages
                 = new ArrayList<PendingPackage>();
 
-        Settings() {
+        DynamicSettings() {
             File dataDir = Environment.getDataDirectory();
             File systemDir = new File(dataDir, "system");
             systemDir.mkdirs();
